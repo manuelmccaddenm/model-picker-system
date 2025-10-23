@@ -65,7 +65,10 @@ def perform_eda(dataset_path: str, sample_rows: int = 1000) -> Dict[str, Any]:
         # Try to parse as datetime if string
         if not is_datetime and s.dtype == 'object':
             try:
-                pd.to_datetime(s.dropna().head(100))
+                import warnings
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore")
+                    pd.to_datetime(s.dropna().head(100), errors='coerce')
                 is_datetime = True
                 datetime_cols.append(c)
             except:
