@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+"""Test Data Agent with clear context - should ask minimal or no questions"""
+import json
+from pathlib import Path
+from agents import Runner
+from src.agents import build_data_agent, BusinessContext
+
+dataset_path = str(Path("data/sample.csv").resolve())
+
+data_agent = build_data_agent()
+
+# Clear prompt with task specified
+msg = (
+    f"DATASET_CSV_PATH: {dataset_path}\n"
+    f"INSTRUCTIONS: I want to predict customer churn. The target variable is 'Churn'.\n"
+)
+
+print("=" * 70)
+print("Testing Data Agent with CLEAR CONTEXT")
+print("=" * 70)
+print(f"\nDataset: {dataset_path}")
+print(f"Prompt: 'I want to predict customer churn. The target variable is Churn.'\n")
+print("Expected: Agent should understand task/target, maybe ask about preferences")
+print("=" * 70)
+
+try:
+    print("\nRunning agent...")
+    result = Runner.run_sync(data_agent, msg)
+    bc = result.final_output_as(BusinessContext)
+    
+    print("\n" + "=" * 70)
+    print("RESULT:")
+    print("=" * 70)
+    
+    print(f"\n✓ Task: {bc.task or '❌ MISSING'}")
+    print(f"✓ Target: {bc.target or '❌ MISSING'}")
+    print(f"✓ Objective: {bc.objective or '(not set)'}")
+    print(f"✓ Primary Metric: {bc.primary_metric or '(not set)'}")
+    
+    if bc.clarifying_questions:
+        print(f"\n🤔 Clarifying Questions ({len(bc.clarifying_questions)}):")
+        for i, q in enumerate(bc.clarifying_questions, 1):
+            print(f"   {i}. {q}")
+    else:
+        print("\n✓ No clarifying questions needed (task and target are clear)")
+    
+    if bc.dataset_profile:
+        print(f"\n✓ Dataset Profile: {bc.dataset_profile.n_rows} rows, {bc.dataset_profile.n_cols} cols")
+    else:
+        print("\n❌ No dataset profile (agent didn't call perform_eda)")
+    
+    if bc.key_insights:
+        print(f"\n💡 Key Insights ({len(bc.key_insights)}):")
+        for insight in bc.key_insights:
+            print(f"   - {insight}")
+    
+    print("\n" + "=" * 70)
+    
+except Exception as e:
+    print(f"\n❌ Error: {e}")
+    import traceback
+    traceback.print_exc()
+

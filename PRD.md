@@ -43,7 +43,7 @@ AnalystLesson structure:
 - id (uuid), question, why, trigger_conditions{task?, patterns?, thresholds?}, priority (1-3), last_updated
 
 ## 5. Memory Tool
-Module: `src/memory_tool.py`
+Module: `src/tools/memory.py`
 - ensure_schema(path) -> Dict: initializes schema_version/updated_at and required lists.
 - build_indexes(mem) -> {by_task, by_tag}
 - get_theory(mem, task?, tags?, limit?) -> [ModelTheory]
@@ -64,7 +64,21 @@ Module: `src/memory_tool.py`
   - logs/run_history.jsonl
   - memory/memory.json (updated with experiences/learnings)
 
-## 8. Future Work
+## 8. MVP Trial (Offline Evaluator)
+- Goal: Run a quick baseline evaluation without LLM calls.
+- Entry point: `python app.py`
+- Flow:
+  1) Load `data/dataset_a_churn.csv`.
+  2) Build sklearn Pipeline candidates with preprocessing via `src/tools/models.py`.
+  3) Load `memory/memory.json` for tradeoff_scores (interpretability, costo_computacional).
+  4) Cross-validate each candidate and compute performance (ROC AUC for classification; negative MAE normalized for regression).
+  5) Compute J = w_perf*perf_loss + w_interp*interp_loss + w_cost*cost_loss (defaults can be overridden in `plan.weights`).
+  6) Print winner and Top-3 leaderboard with J and component scores.
+- Extensions implemented:
+  - HPO: `evaluate_with_j_hpo_assumptions` performs lightweight hyperparameter sweeps per candidate (budgeted) and selects the best J.
+  - Assumptions: basic checks (missing_fraction, high-cardinality, numeric/categorical mix) produce a small penalty term included in J.
+
+## 9. Future Work
 - Add guardrails and validation for Agent outputs.
 - Implement retrieval scoring for experiences (schema similarity).
 - Extend to time series agents/tools.
