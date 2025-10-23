@@ -1,3 +1,17 @@
 openai>=1.30.0
 pandas>=2.0.0
 python-dotenv>=1.0.0
+scikit-learn>=1.0.0
+langgraph>=0.3.0
+openai-agents>=0.1.0
+prophet>=1.0.0
+statsmodels>=0.10.0
+xgboost>=1.0.0
+lightgbm>=1.0.0
+catboost>=1.0.0
+mlflow>=1.0.0
+mlflow-skinny>=1.0.0
+mlflow-sklearn>=1.0.0
+mlflow-xgboost>=1.0.0
+mlflow-lightgbm>=1.0.0
+mlflow-catboost>=1.0.0
