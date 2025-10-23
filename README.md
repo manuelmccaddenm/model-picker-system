@@ -6,6 +6,10 @@ To build a multi-agent system that manages the end-to-end machine learning lifec
 
 2. Core Architecture: 3-Agent System
 
+![My First Board](https://github.com/user-attachments/assets/ef71d27f-1f22-4b81-a58a-61f2ff3f0ce7)
+
+
+
 For the hackathon, the system will operate as a 3-agent core, with a main script or simple UI handling the orchestration and user interaction directly.
 
 Workflow Overview
