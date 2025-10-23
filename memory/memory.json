@@ -1,445 +1,510 @@
 {
-    "teoria": [
-      {
-        "model_id": "LinearRegression",
-        "task": "regression",
-        "family": "Lineal",
-        "description": "Modelo lineal estándar que asume una relación lineal entre features y el objetivo. Minimiza el error cuadrático medio (MSE) sin regularización.",
-        "strengths": [
-          "Máxima interpretabilidad (coeficientes directamente interpretables).",
-          "Extremadamente rápido para entrenar y predecir (solución analítica cerrada).",
-          "Sin hiperparámetros complejos que ajustar.",
-          "Baseline robusto y punto de partida estándar.",
-          "Proporciona intervalos de confianza y métricas estadísticas (R², p-values)."
-        ],
-        "limitations": [
-          "No puede capturar relaciones no lineales sin transformación manual de features.",
-          "Muy sensible a outliers (valores atípicos) que pueden distorsionar el modelo.",
-          "Asume homoscedasticidad (varianza constante de errores).",
-          "Sufre de multicolinealidad cuando features están correlacionadas (coeficientes inestables).",
-          "No realiza selección de features automáticamente.",
-          "Puede sobreajustar con muchas features y pocos datos."
-        ],
-        "recommendations_use_when": [
-          "La interpretabilidad es la máxima prioridad.",
-          "Se necesita un baseline rápido para comparación.",
-          "La relación entre variables parece ser aproximadamente lineal.",
-          "Se requiere explicar el impacto de cada feature (inferencia estadística).",
-          "El dataset es pequeño a mediano y las features no están altamente correlacionadas."
-        ],
-        "recommendations_avoid_when": [
-          "El problema es claramente no lineal.",
-          "La precisión predictiva es la máxima prioridad.",
-          "Hay muchas features correlacionadas (considerar regularización).",
-          "Se requiere selección automática de features."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 1.0,
-          "precision_predictiva": 0.3,
-          "costo_computacional": 1.0,
-          "robustez_outliers": 0.2
-        },
-        "tags": ["lineal", "interpretable", "baseline", "parametrico"]
+  "teoria": [
+    {
+      "model_id": "LinearRegression",
+      "task": "regression",
+      "family": "Lineal",
+      "description": "Modelo lineal estándar que asume una relación lineal entre features y el objetivo. Minimiza el error cuadrático medio (MSE) sin regularización.",
+      "strengths": [
+        "Máxima interpretabilidad (coeficientes directamente interpretables).",
+        "Extremadamente rápido para entrenar y predecir (solución analítica cerrada).",
+        "Sin hiperparámetros complejos que ajustar.",
+        "Baseline robusto y punto de partida estándar.",
+        "Proporciona intervalos de confianza y métricas estadísticas (R², p-values)."
+      ],
+      "limitations": [
+        "No puede capturar relaciones no lineales sin transformación manual de features.",
+        "Muy sensible a outliers (valores atípicos) que pueden distorsionar el modelo.",
+        "Asume homoscedasticidad (varianza constante de errores).",
+        "Sufre de multicolinealidad cuando features están correlacionadas (coeficientes inestables).",
+        "No realiza selección de features automáticamente.",
+        "Puede sobreajustar con muchas features y pocos datos."
+      ],
+      "recommendations_use_when": [
+        "La interpretabilidad es la máxima prioridad.",
+        "Se necesita un baseline rápido para comparación.",
+        "La relación entre variables parece ser aproximadamente lineal.",
+        "Se requiere explicar el impacto de cada feature (inferencia estadística).",
+        "El dataset es pequeño a mediano y las features no están altamente correlacionadas."
+      ],
+      "recommendations_avoid_when": [
+        "El problema es claramente no lineal.",
+        "La precisión predictiva es la máxima prioridad.",
+        "Hay muchas features correlacionadas (considerar regularización).",
+        "Se requiere selección automática de features."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 1.0,
+        "precision_predictiva": 0.3,
+        "costo_computacional": 1.0,
+        "robustez_outliers": 0.2
       },
-      {
-        "model_id": "RandomForestRegressor",
-        "task": "regression",
-        "family": "Ensamble (Bagging)",
-        "description": "Ensamble de árboles de decisión entrenados en subconjuntos aleatorios de datos y features. Promedia las predicciones para reducir varianza.",
-        "strengths": [
-          "Alta precisión predictiva en la mayoría de problemas.",
-          "Muy robusto al sobreajuste (gracias al bagging).",
-          "Maneja bien relaciones no lineales e interacciones complejas.",
-          "No requiere escalado de features.",
-          "Maneja valores faltantes razonablemente bien.",
-          "Proporciona 'feature importance' útil.",
-          "Robusto a outliers en comparación con modelos lineales.",
-          "Fácil de usar con buenos parámetros por defecto."
-        ],
-        "limitations": [
-          "Baja interpretabilidad (modelo de caja negra).",
-          "Mayor tiempo de entrenamiento que modelos lineales.",
-          "Mayor tiempo de predicción que modelos simples.",
-          "Mayor uso de memoria que un solo árbol.",
-          "No puede extrapolar fuera del rango de datos de entrenamiento.",
-          "Puede estar sesgado hacia features con muchas categorías o valores únicos.",
-          "Menos preciso que modelos de Gradient Boosting más avanzados en muchos casos."
-        ],
-        "recommendations_use_when": [
-          "La precisión es más importante que la interpretabilidad.",
-          "Se sospechan relaciones no lineales complejas.",
-          "Es el primer modelo complejo a probar (todoterreno).",
-          "Se necesita robustez al sobreajuste sin mucho tuning.",
-          "Hay valores faltantes en los datos.",
-          "Se quiere conocer la importancia de features."
-        ],
-        "recommendations_avoid_when": [
-          "La interpretabilidad es la máxima prioridad.",
-          "El tiempo de entrenamiento o predicción es extremadamente limitado.",
-          "La memoria es muy limitada.",
-          "Se requiere extrapolar más allá de los datos de entrenamiento."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.3,
-          "precision_predictiva": 0.8,
-          "costo_computacional": 0.5,
-          "robustez_outliers": 0.7
-        },
-        "tags": ["ensamble", "bagging", "no-lineal", "robusto", "feature-importance"]
+      "tags": [
+        "lineal",
+        "interpretable",
+        "baseline",
+        "parametrico"
+      ]
+    },
+    {
+      "model_id": "RandomForestRegressor",
+      "task": "regression",
+      "family": "Ensamble (Bagging)",
+      "description": "Ensamble de árboles de decisión entrenados en subconjuntos aleatorios de datos y features. Promedia las predicciones para reducir varianza.",
+      "strengths": [
+        "Alta precisión predictiva en la mayoría de problemas.",
+        "Muy robusto al sobreajuste (gracias al bagging).",
+        "Maneja bien relaciones no lineales e interacciones complejas.",
+        "No requiere escalado de features.",
+        "Maneja valores faltantes razonablemente bien.",
+        "Proporciona 'feature importance' útil.",
+        "Robusto a outliers en comparación con modelos lineales.",
+        "Fácil de usar con buenos parámetros por defecto."
+      ],
+      "limitations": [
+        "Baja interpretabilidad (modelo de caja negra).",
+        "Mayor tiempo de entrenamiento que modelos lineales.",
+        "Mayor tiempo de predicción que modelos simples.",
+        "Mayor uso de memoria que un solo árbol.",
+        "No puede extrapolar fuera del rango de datos de entrenamiento.",
+        "Puede estar sesgado hacia features con muchas categorías o valores únicos.",
+        "Menos preciso que modelos de Gradient Boosting más avanzados en muchos casos."
+      ],
+      "recommendations_use_when": [
+        "La precisión es más importante que la interpretabilidad.",
+        "Se sospechan relaciones no lineales complejas.",
+        "Es el primer modelo complejo a probar (todoterreno).",
+        "Se necesita robustez al sobreajuste sin mucho tuning.",
+        "Hay valores faltantes en los datos.",
+        "Se quiere conocer la importancia de features."
+      ],
+      "recommendations_avoid_when": [
+        "La interpretabilidad es la máxima prioridad.",
+        "El tiempo de entrenamiento o predicción es extremadamente limitado.",
+        "La memoria es muy limitada.",
+        "Se requiere extrapolar más allá de los datos de entrenamiento."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.3,
+        "precision_predictiva": 0.8,
+        "costo_computacional": 0.5,
+        "robustez_outliers": 0.7
       },
-      {
-        "model_id": "MLPRegressor",
-        "task": "regression",
-        "family": "Red Neuronal",
-        "description": "Perceptrón Multicapa (Multi-Layer Perceptron). Red neuronal feedforward con capas ocultas que puede aprender funciones no lineales arbitrariamente complejas.",
-        "strengths": [
-          "Potencial de modelar relaciones extremadamente complejas y no lineales.",
-          "Puede aprender representaciones jerárquicas de features.",
-          "Capaz de aproximar cualquier función (teorema de aproximación universal).",
-          "Flexible en arquitectura (número de capas y neuronas).",
-          "Puede procesar features de alta dimensionalidad."
-        ],
-        "limitations": [
-          "Interpretabilidad casi nula (caja negra completa).",
-          "REQUIERE escalado/normalización de features (muy sensible).",
-          "Muchos hiperparámetros (arquitectura, learning_rate, activation, optimizer).",
-          "Entrenamiento lento y computacionalmente costoso.",
-          "Propenso a quedar atrapado en mínimos locales.",
-          "Requiere gran cantidad de datos para buen desempeño.",
-          "Muy difícil de debuggear y tunear.",
-          "Implementación de sklearn limitada (considerar PyTorch/TensorFlow para casos complejos)."
-        ],
-        "recommendations_use_when": [
-          "El problema es extremadamente complejo y no lineal.",
-          "Se tiene una gran cantidad de datos (> 10k observaciones).",
-          "La precisión es la única prioridad absoluta.",
-          "Se ha probado todo lo demás sin éxito.",
-          "Se tiene experiencia en deep learning.",
-          "Se dispone de recursos computacionales significativos."
-        ],
-        "recommendations_avoid_when": [
-          "La interpretabilidad es importante.",
-          "El dataset es pequeño (< 10k observaciones).",
-          "Las features no están escaladas.",
-          "Se necesita un resultado rápido.",
-          "No se tiene experiencia con redes neuronales.",
-          "Modelos más simples no han sido probados primero."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.05,
-          "precision_predictiva": 0.85,
-          "costo_computacional": 0.2,
-          "robustez_outliers": 0.3
-        },
-        "tags": ["red-neuronal", "deep-learning", "no-lineal", "complejo", "scaling-required", "caja-negra"]
+      "tags": [
+        "ensamble",
+        "bagging",
+        "no-lineal",
+        "robusto",
+        "feature-importance"
+      ]
+    },
+    {
+      "model_id": "MLPRegressor",
+      "task": "regression",
+      "family": "Red Neuronal",
+      "description": "Perceptrón Multicapa (Multi-Layer Perceptron). Red neuronal feedforward con capas ocultas que puede aprender funciones no lineales arbitrariamente complejas.",
+      "strengths": [
+        "Potencial de modelar relaciones extremadamente complejas y no lineales.",
+        "Puede aprender representaciones jerárquicas de features.",
+        "Capaz de aproximar cualquier función (teorema de aproximación universal).",
+        "Flexible en arquitectura (número de capas y neuronas).",
+        "Puede procesar features de alta dimensionalidad."
+      ],
+      "limitations": [
+        "Interpretabilidad casi nula (caja negra completa).",
+        "REQUIERE escalado/normalización de features (muy sensible).",
+        "Muchos hiperparámetros (arquitectura, learning_rate, activation, optimizer).",
+        "Entrenamiento lento y computacionalmente costoso.",
+        "Propenso a quedar atrapado en mínimos locales.",
+        "Requiere gran cantidad de datos para buen desempeño.",
+        "Muy difícil de debuggear y tunear.",
+        "Implementación de sklearn limitada (considerar PyTorch/TensorFlow para casos complejos)."
+      ],
+      "recommendations_use_when": [
+        "El problema es extremadamente complejo y no lineal.",
+        "Se tiene una gran cantidad de datos (> 10k observaciones).",
+        "La precisión es la única prioridad absoluta.",
+        "Se ha probado todo lo demás sin éxito.",
+        "Se tiene experiencia en deep learning.",
+        "Se dispone de recursos computacionales significativos."
+      ],
+      "recommendations_avoid_when": [
+        "La interpretabilidad es importante.",
+        "El dataset es pequeño (< 10k observaciones).",
+        "Las features no están escaladas.",
+        "Se necesita un resultado rápido.",
+        "No se tiene experiencia con redes neuronales.",
+        "Modelos más simples no han sido probados primero."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.05,
+        "precision_predictiva": 0.85,
+        "costo_computacional": 0.2,
+        "robustez_outliers": 0.3
       },
-      {
-        "model_id": "ARIMA",
-        "task": "regression",
-        "family": "Series de Tiempo",
-        "description": "Autoregressive Integrated Moving Average. Modelo estadístico clásico para series de tiempo univariadas que combina auto-regresión, integración (diferenciación) y promedios móviles.",
-        "strengths": [
-          "Base teórica estadística sólida y bien establecida.",
-          "Excelente para capturar tendencias y patrones de auto-correlación.",
-          "Interpretable mediante parámetros p, d, q.",
-          "Puede extenderse a SARIMA para estacionalidad.",
-          "Funciona bien con series de tiempo cortas.",
-          "Proporciona intervalos de confianza para pronósticos.",
-          "Modelo estándar en econometría y finanzas."
-        ],
-        "limitations": [
-          "SOLO funciona con datos de series de tiempo univariadas.",
-          "Requiere estacionariedad (necesita diferenciación, parámetro 'd').",
-          "Complejo de tunear (encontrar p, d, q óptimos).",
-          "No maneja regresores externos (features adicionales) fácilmente.",
-          "Asume linealidad en las relaciones temporales.",
-          "Puede ser superado por modelos más modernos en series complejas.",
-          "Difícil con series con múltiples estacionalidades complejas."
-        ],
-        "recommendations_use_when": [
-          "El problema es una serie de tiempo univariada.",
-          "Existen tendencias claras o patrones de auto-correlación.",
-          "Se requiere un modelo estadístico robusto y tradicional.",
-          "Se necesitan intervalos de confianza estadísticamente válidos.",
-          "El horizonte de pronóstico es corto a mediano plazo.",
-          "Se trabaja en economía o finanzas (modelo estándar)."
-        ],
-        "recommendations_avoid_when": [
-          "El problema no es una serie de tiempo.",
-          "Hay muchas features externas/exógenas importantes.",
-          "La serie tiene múltiples estacionalidades complejas.",
-          "Se requiere incorporar eventos externos o feriados fácilmente."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.7,
-          "precision_predictiva": 0.65,
-          "costo_computacional": 0.6,
-          "robustez_outliers": 0.4
-        },
-        "tags": ["series-de-tiempo", "univariado", "estadistico", "estacionariedad", "auto-correlacion"]
+      "tags": [
+        "red-neuronal",
+        "deep-learning",
+        "no-lineal",
+        "complejo",
+        "scaling-required",
+        "caja-negra"
+      ]
+    },
+    {
+      "model_id": "ARIMA",
+      "task": "regression",
+      "family": "Series de Tiempo",
+      "description": "Autoregressive Integrated Moving Average. Modelo estadístico clásico para series de tiempo univariadas que combina auto-regresión, integración (diferenciación) y promedios móviles.",
+      "strengths": [
+        "Base teórica estadística sólida y bien establecida.",
+        "Excelente para capturar tendencias y patrones de auto-correlación.",
+        "Interpretable mediante parámetros p, d, q.",
+        "Puede extenderse a SARIMA para estacionalidad.",
+        "Funciona bien con series de tiempo cortas.",
+        "Proporciona intervalos de confianza para pronósticos.",
+        "Modelo estándar en econometría y finanzas."
+      ],
+      "limitations": [
+        "SOLO funciona con datos de series de tiempo univariadas.",
+        "Requiere estacionariedad (necesita diferenciación, parámetro 'd').",
+        "Complejo de tunear (encontrar p, d, q óptimos).",
+        "No maneja regresores externos (features adicionales) fácilmente.",
+        "Asume linealidad en las relaciones temporales.",
+        "Puede ser superado por modelos más modernos en series complejas.",
+        "Difícil con series con múltiples estacionalidades complejas."
+      ],
+      "recommendations_use_when": [
+        "El problema es una serie de tiempo univariada.",
+        "Existen tendencias claras o patrones de auto-correlación.",
+        "Se requiere un modelo estadístico robusto y tradicional.",
+        "Se necesitan intervalos de confianza estadísticamente válidos.",
+        "El horizonte de pronóstico es corto a mediano plazo.",
+        "Se trabaja en economía o finanzas (modelo estándar)."
+      ],
+      "recommendations_avoid_when": [
+        "El problema no es una serie de tiempo.",
+        "Hay muchas features externas/exógenas importantes.",
+        "La serie tiene múltiples estacionalidades complejas.",
+        "Se requiere incorporar eventos externos o feriados fácilmente."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.7,
+        "precision_predictiva": 0.65,
+        "costo_computacional": 0.6,
+        "robustez_outliers": 0.4
       },
-      {
-        "model_id": "Prophet",
-        "task": "regression",
-        "family": "Series de Tiempo",
-        "description": "Modelo de series de tiempo de Meta (Facebook) diseñado para ser robusto a datos faltantes, outliers y múltiples estacionalidades. Usa un modelo aditivo descomponible.",
-        "strengths": [
-          "Excelente manejo de múltiples estacionalidades (diaria, semanal, anual).",
-          "Muy robusto a datos faltantes y outliers.",
-          "Maneja regresores externos (feriados, eventos) nativamente.",
-          "Rápido y fácil de usar con buenos parámetros por defecto.",
-          "No requiere que la serie sea estacionaria.",
-          "Proporciona componentes interpretables (tendencia, estacionalidad).",
-          "Excelente para pronósticos de negocio.",
-          "Visualizaciones automáticas de componentes."
-        ],
-        "limitations": [
-          "SOLO funciona con datos de series de tiempo.",
-          "Puede ser superado por modelos estadísticos afinados en series simples.",
-          "Menos flexible que modelos de deep learning para patrones muy complejos.",
-          "Asume estacionalidades aditivas o multiplicativas (no ambas simultáneamente).",
-          "No tan bueno con series muy cortas (< 2 ciclos estacionales).",
-          "Puede sobreajustar con demasiados regresores."
-        ],
-        "recommendations_use_when": [
-          "La serie de tiempo tiene patrones estacionales claros (múltiples).",
-          "Existen feriados u otros eventos externos importantes.",
-          "Hay datos faltantes u outliers en la serie.",
-          "Se necesita un modelo robusto y rápido sin mucho tuning.",
-          "Se requiere descomposición interpretable (tendencia + estacionalidad).",
-          "Se trabaja con datos de negocio (ventas, usuarios, métricas)."
-        ],
-        "recommendations_avoid_when": [
-          "El problema no es una serie de tiempo.",
-          "La serie es muy corta (< 2 ciclos completos).",
-          "Se requiere máxima precisión a cualquier costo.",
-          "La serie no tiene patrones estacionales claros."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.65,
-          "precision_predictiva": 0.75,
-          "costo_computacional": 0.7,
-          "robustez_outliers": 0.8
-        },
-        "tags": ["series-de-tiempo", "estacionalidad", "regresores-externos", "robusto", "feriados"]
+      "tags": [
+        "series-de-tiempo",
+        "univariado",
+        "estadistico",
+        "estacionariedad",
+        "auto-correlacion"
+      ]
+    },
+    {
+      "model_id": "Prophet",
+      "task": "regression",
+      "family": "Series de Tiempo",
+      "description": "Modelo de series de tiempo de Meta (Facebook) diseñado para ser robusto a datos faltantes, outliers y múltiples estacionalidades. Usa un modelo aditivo descomponible.",
+      "strengths": [
+        "Excelente manejo de múltiples estacionalidades (diaria, semanal, anual).",
+        "Muy robusto a datos faltantes y outliers.",
+        "Maneja regresores externos (feriados, eventos) nativamente.",
+        "Rápido y fácil de usar con buenos parámetros por defecto.",
+        "No requiere que la serie sea estacionaria.",
+        "Proporciona componentes interpretables (tendencia, estacionalidad).",
+        "Excelente para pronósticos de negocio.",
+        "Visualizaciones automáticas de componentes."
+      ],
+      "limitations": [
+        "SOLO funciona con datos de series de tiempo.",
+        "Puede ser superado por modelos estadísticos afinados en series simples.",
+        "Menos flexible que modelos de deep learning para patrones muy complejos.",
+        "Asume estacionalidades aditivas o multiplicativas (no ambas simultáneamente).",
+        "No tan bueno con series muy cortas (< 2 ciclos estacionales).",
+        "Puede sobreajustar con demasiados regresores."
+      ],
+      "recommendations_use_when": [
+        "La serie de tiempo tiene patrones estacionales claros (múltiples).",
+        "Existen feriados u otros eventos externos importantes.",
+        "Hay datos faltantes u outliers en la serie.",
+        "Se necesita un modelo robusto y rápido sin mucho tuning.",
+        "Se requiere descomposición interpretable (tendencia + estacionalidad).",
+        "Se trabaja con datos de negocio (ventas, usuarios, métricas)."
+      ],
+      "recommendations_avoid_when": [
+        "El problema no es una serie de tiempo.",
+        "La serie es muy corta (< 2 ciclos completos).",
+        "Se requiere máxima precisión a cualquier costo.",
+        "La serie no tiene patrones estacionales claros."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.65,
+        "precision_predictiva": 0.75,
+        "costo_computacional": 0.7,
+        "robustez_outliers": 0.8
       },
-      {
-        "model_id": "LogisticRegression",
-        "task": "classification",
-        "family": "Lineal",
-        "description": "Modelo lineal para clasificación que modela la probabilidad de pertenencia a una clase usando la función logística (sigmoide).",
-        "strengths": [
-          "Máxima interpretabilidad (coeficientes y odds ratios).",
-          "Extremadamente rápido para entrenar y predecir.",
-          "Proporciona probabilidades calibradas naturalmente.",
-          "Baseline robusto para clasificación binaria y multiclase.",
-          "Funciona bien con features que se relacionan linealmente con el log-odds.",
-          "Regularización L1/L2 disponible en sklearn.",
-          "Extensible a multiclase (one-vs-rest, multinomial)."
-        ],
-        "limitations": [
-          "No puede capturar relaciones no lineales (frontera de decisión lineal).",
-          "Asume independencia de observaciones.",
-          "Puede sufrir de separación perfecta o cuasi-perfecta.",
-          "Sensible a multicolinealidad sin regularización.",
-          "Rendimiento limitado en problemas complejos no lineales."
-        ],
-        "recommendations_use_when": [
-          "La interpretabilidad es la máxima prioridad.",
-          "Se necesita un baseline rápido.",
-          "Se requieren probabilidades bien calibradas.",
-          "La relación entre features y log-odds es aproximadamente lineal.",
-          "Se necesita explicar el impacto de cada feature.",
-          "Problemas de clasificación binaria o multiclase simples."
-        ],
-        "recommendations_avoid_when": [
-          "El problema es claramente no lineal.",
-          "La precisión predictiva es la máxima prioridad.",
-          "Hay interacciones complejas entre features.",
-          "Se requiere capturar patrones muy complejos."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 1.0,
-          "precision_predictiva": 0.45,
-          "costo_computacional": 1.0,
-          "robustez_outliers": 0.3
-        },
-        "tags": ["lineal", "interpretable", "baseline", "probabilidades", "clasificacion"]
+      "tags": [
+        "series-de-tiempo",
+        "estacionalidad",
+        "regresores-externos",
+        "robusto",
+        "feriados"
+      ]
+    },
+    {
+      "model_id": "LogisticRegression",
+      "task": "classification",
+      "family": "Lineal",
+      "description": "Modelo lineal para clasificación que modela la probabilidad de pertenencia a una clase usando la función logística (sigmoide).",
+      "strengths": [
+        "Máxima interpretabilidad (coeficientes y odds ratios).",
+        "Extremadamente rápido para entrenar y predecir.",
+        "Proporciona probabilidades calibradas naturalmente.",
+        "Baseline robusto para clasificación binaria y multiclase.",
+        "Funciona bien con features que se relacionan linealmente con el log-odds.",
+        "Regularización L1/L2 disponible en sklearn.",
+        "Extensible a multiclase (one-vs-rest, multinomial)."
+      ],
+      "limitations": [
+        "No puede capturar relaciones no lineales (frontera de decisión lineal).",
+        "Asume independencia de observaciones.",
+        "Puede sufrir de separación perfecta o cuasi-perfecta.",
+        "Sensible a multicolinealidad sin regularización.",
+        "Rendimiento limitado en problemas complejos no lineales."
+      ],
+      "recommendations_use_when": [
+        "La interpretabilidad es la máxima prioridad.",
+        "Se necesita un baseline rápido.",
+        "Se requieren probabilidades bien calibradas.",
+        "La relación entre features y log-odds es aproximadamente lineal.",
+        "Se necesita explicar el impacto de cada feature.",
+        "Problemas de clasificación binaria o multiclase simples."
+      ],
+      "recommendations_avoid_when": [
+        "El problema es claramente no lineal.",
+        "La precisión predictiva es la máxima prioridad.",
+        "Hay interacciones complejas entre features.",
+        "Se requiere capturar patrones muy complejos."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 1.0,
+        "precision_predictiva": 0.45,
+        "costo_computacional": 1.0,
+        "robustez_outliers": 0.3
       },
-      {
-        "model_id": "GaussianNB",
-        "task": "classification",
-        "family": "Probabilístico",
-        "description": "Clasificador Naive Bayes que asume independencia condicional entre features dada la clase, y distribución Gaussiana de features continuas.",
-        "strengths": [
-          "Extremadamente rápido para entrenar y predecir.",
-          "Funciona sorprendentemente bien con alta dimensionalidad (ej. texto).",
-          "Requiere pocos datos de entrenamiento relativamente.",
-          "Proporciona probabilidades.",
-          "Robusto a features irrelevantes (gracias al supuesto de independencia).",
-          "Simple y fácil de implementar.",
-          "Funciona bien como baseline rápido."
-        ],
-        "limitations": [
-          "El supuesto de 'independencia ingenua' casi nunca es cierto en la realidad.",
-          "Puede fallar cuando features están altamente correlacionadas.",
-          "Asume distribución Gaussiana (Normal) para features continuas.",
-          "Las probabilidades pueden estar mal calibradas.",
-          "No captura interacciones entre features.",
-          "Rendimiento limitado comparado con modelos más sofisticados."
-        ],
-        "recommendations_use_when": [
-          "La velocidad es crítica.",
-          "El dataset es de muy alta dimensión (ej. NLP, bag-of-words).",
-          "Se necesita un baseline extremadamente rápido.",
-          "El dataset de entrenamiento es pequeño.",
-          "Las features son realmente independientes o casi independientes."
-        ],
-        "recommendations_avoid_when": [
-          "Las features están claramente correlacionadas.",
-          "Se necesita máxima precisión.",
-          "Las interacciones entre features son importantes.",
-          "Las features no siguen distribución Gaussiana."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.7,
-          "precision_predictiva": 0.5,
-          "costo_computacional": 1.0,
-          "robustez_outliers": 0.5
-        },
-        "tags": ["probabilistico", "naive-bayes", "baseline", "rapido", "texto", "alta-dimension"]
+      "tags": [
+        "lineal",
+        "interpretable",
+        "baseline",
+        "probabilidades",
+        "clasificacion"
+      ]
+    },
+    {
+      "model_id": "GaussianNB",
+      "task": "classification",
+      "family": "Probabilístico",
+      "description": "Clasificador Naive Bayes que asume independencia condicional entre features dada la clase, y distribución Gaussiana de features continuas.",
+      "strengths": [
+        "Extremadamente rápido para entrenar y predecir.",
+        "Funciona sorprendentemente bien con alta dimensionalidad (ej. texto).",
+        "Requiere pocos datos de entrenamiento relativamente.",
+        "Proporciona probabilidades.",
+        "Robusto a features irrelevantes (gracias al supuesto de independencia).",
+        "Simple y fácil de implementar.",
+        "Funciona bien como baseline rápido."
+      ],
+      "limitations": [
+        "El supuesto de 'independencia ingenua' casi nunca es cierto en la realidad.",
+        "Puede fallar cuando features están altamente correlacionadas.",
+        "Asume distribución Gaussiana (Normal) para features continuas.",
+        "Las probabilidades pueden estar mal calibradas.",
+        "No captura interacciones entre features.",
+        "Rendimiento limitado comparado con modelos más sofisticados."
+      ],
+      "recommendations_use_when": [
+        "La velocidad es crítica.",
+        "El dataset es de muy alta dimensión (ej. NLP, bag-of-words).",
+        "Se necesita un baseline extremadamente rápido.",
+        "El dataset de entrenamiento es pequeño.",
+        "Las features son realmente independientes o casi independientes."
+      ],
+      "recommendations_avoid_when": [
+        "Las features están claramente correlacionadas.",
+        "Se necesita máxima precisión.",
+        "Las interacciones entre features son importantes.",
+        "Las features no siguen distribución Gaussiana."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.7,
+        "precision_predictiva": 0.5,
+        "costo_computacional": 1.0,
+        "robustez_outliers": 0.5
       },
-      {
-        "model_id": "SVC",
-        "task": "classification",
-        "family": "Kernel (SVM)",
-        "description": "Support Vector Classifier. Encuentra el hiperplano óptimo que maximiza el margen entre clases. Puede usar kernels para problemas no lineales.",
-        "strengths": [
-          "Muy alta precisión, especialmente en espacios de alta dimensión.",
-          "Efectivo cuando el número de features > número de muestras.",
-          "Flexible mediante diferentes kernels (linear, rbf, poly, sigmoid).",
-          "Robusto al sobreajuste en espacios de alta dimensión.",
-          "Memoria eficiente (solo usa vectores de soporte).",
-          "Funciona bien con fronteras de decisión complejas (kernel rbf)."
-        ],
-        "limitations": [
-          "Muy lento para entrenar en datasets grandes (complejidad O(n²) a O(n³)).",
-          "No proporciona probabilidades directamente (requiere calibración).",
-          "MUY sensible al escalado de features (REQUIERE estandarización).",
-          "Difícil de interpretar, especialmente con kernels no lineales.",
-          "Muchos hiperparámetros para tunear (C, gamma, kernel).",
-          "Malo con datasets con mucho ruido o overlapping de clases.",
-          "No maneja valores faltantes nativamente."
-        ],
-        "recommendations_use_when": [
-          "La máxima precisión es la prioridad.",
-          "El dataset es de alta dimensión (ej. imágenes, texto).",
-          "El número de features > número de muestras.",
-          "El problema es no lineal (usando kernel 'rbf').",
-          "El dataset es pequeño a mediano (< 10k observaciones).",
-          "Las clases están bien separadas."
-        ],
-        "recommendations_avoid_when": [
-          "El dataset es muy grande (> 10k observaciones).",
-          "La interpretabilidad es importante.",
-          "La velocidad de entrenamiento es crítica.",
-          "Las features no están escaladas.",
-          "Se necesitan probabilidades bien calibradas directamente."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.2,
-          "precision_predictiva": 0.88,
-          "costo_computacional": 0.25,
-          "robustez_outliers": 0.4
-        },
-        "tags": ["kernel", "svm", "no-lineal", "alta-precision", "scaling-required", "alta-dimension"]
+      "tags": [
+        "probabilistico",
+        "naive-bayes",
+        "baseline",
+        "rapido",
+        "texto",
+        "alta-dimension"
+      ]
+    },
+    {
+      "model_id": "SVC",
+      "task": "classification",
+      "family": "Kernel (SVM)",
+      "description": "Support Vector Classifier. Encuentra el hiperplano óptimo que maximiza el margen entre clases. Puede usar kernels para problemas no lineales.",
+      "strengths": [
+        "Muy alta precisión, especialmente en espacios de alta dimensión.",
+        "Efectivo cuando el número de features > número de muestras.",
+        "Flexible mediante diferentes kernels (linear, rbf, poly, sigmoid).",
+        "Robusto al sobreajuste en espacios de alta dimensión.",
+        "Memoria eficiente (solo usa vectores de soporte).",
+        "Funciona bien con fronteras de decisión complejas (kernel rbf)."
+      ],
+      "limitations": [
+        "Muy lento para entrenar en datasets grandes (complejidad O(n²) a O(n³)).",
+        "No proporciona probabilidades directamente (requiere calibración).",
+        "MUY sensible al escalado de features (REQUIERE estandarización).",
+        "Difícil de interpretar, especialmente con kernels no lineales.",
+        "Muchos hiperparámetros para tunear (C, gamma, kernel).",
+        "Malo con datasets con mucho ruido o overlapping de clases.",
+        "No maneja valores faltantes nativamente."
+      ],
+      "recommendations_use_when": [
+        "La máxima precisión es la prioridad.",
+        "El dataset es de alta dimensión (ej. imágenes, texto).",
+        "El número de features > número de muestras.",
+        "El problema es no lineal (usando kernel 'rbf').",
+        "El dataset es pequeño a mediano (< 10k observaciones).",
+        "Las clases están bien separadas."
+      ],
+      "recommendations_avoid_when": [
+        "El dataset es muy grande (> 10k observaciones).",
+        "La interpretabilidad es importante.",
+        "La velocidad de entrenamiento es crítica.",
+        "Las features no están escaladas.",
+        "Se necesitan probabilidades bien calibradas directamente."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.2,
+        "precision_predictiva": 0.88,
+        "costo_computacional": 0.25,
+        "robustez_outliers": 0.4
       },
-      {
-        "model_id": "RandomForestClassifier",
-        "task": "classification",
-        "family": "Ensamble (Bagging)",
-        "description": "Ensamble de árboles de decisión para clasificación. Cada árbol vota por una clase y la predicción final es la clase más votada.",
-        "strengths": [
-          "Alta precisión predictiva en la mayoría de problemas.",
-          "Muy robusto al sobreajuste.",
-          "Maneja bien relaciones no lineales e interacciones.",
-          "Proporciona 'feature importance' y probabilidades.",
-          "No requiere escalado de features.",
-          "Maneja valores faltantes razonablemente.",
-          "Robusto a outliers.",
-          "Funciona bien con datos desbalanceados (usando class_weight)."
-        ],
-        "limitations": [
-          "Baja interpretabilidad (caja negra).",
-          "Más lento que modelos lineales.",
-          "Mayor uso de memoria.",
-          "Puede estar sesgado hacia features con muchas categorías.",
-          "Las probabilidades pueden estar mal calibradas (requiere calibración).",
-          "Menos preciso que modelos de Gradient Boosting más avanzados en muchos casos."
-        ],
-        "recommendations_use_when": [
-          "La precisión es más importante que la interpretabilidad.",
-          "Es el primer modelo complejo a probar (todoterreno).",
-          "Se sospechan relaciones no lineales.",
-          "Se necesita robustez sin mucho tuning.",
-          "Hay valores faltantes en los datos.",
-          "Se quiere conocer la importancia de features."
-        ],
-        "recommendations_avoid_when": [
-          "La interpretabilidad es la máxima prioridad.",
-          "El tiempo de entrenamiento es extremadamente limitado.",
-          "La memoria es muy limitada.",
-          "Se necesitan probabilidades muy bien calibradas."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.3,
-          "precision_predictiva": 0.82,
-          "costo_computacional": 0.5,
-          "robustez_outliers": 0.7
-        },
-        "tags": ["ensamble", "bagging", "no-lineal", "robusto", "probabilidades", "feature-importance"]
+      "tags": [
+        "kernel",
+        "svm",
+        "no-lineal",
+        "alta-precision",
+        "scaling-required",
+        "alta-dimension"
+      ]
+    },
+    {
+      "model_id": "RandomForestClassifier",
+      "task": "classification",
+      "family": "Ensamble (Bagging)",
+      "description": "Ensamble de árboles de decisión para clasificación. Cada árbol vota por una clase y la predicción final es la clase más votada.",
+      "strengths": [
+        "Alta precisión predictiva en la mayoría de problemas.",
+        "Muy robusto al sobreajuste.",
+        "Maneja bien relaciones no lineales e interacciones.",
+        "Proporciona 'feature importance' y probabilidades.",
+        "No requiere escalado de features.",
+        "Maneja valores faltantes razonablemente.",
+        "Robusto a outliers.",
+        "Funciona bien con datos desbalanceados (usando class_weight)."
+      ],
+      "limitations": [
+        "Baja interpretabilidad (caja negra).",
+        "Más lento que modelos lineales.",
+        "Mayor uso de memoria.",
+        "Puede estar sesgado hacia features con muchas categorías.",
+        "Las probabilidades pueden estar mal calibradas (requiere calibración).",
+        "Menos preciso que modelos de Gradient Boosting más avanzados en muchos casos."
+      ],
+      "recommendations_use_when": [
+        "La precisión es más importante que la interpretabilidad.",
+        "Es el primer modelo complejo a probar (todoterreno).",
+        "Se sospechan relaciones no lineales.",
+        "Se necesita robustez sin mucho tuning.",
+        "Hay valores faltantes en los datos.",
+        "Se quiere conocer la importancia de features."
+      ],
+      "recommendations_avoid_when": [
+        "La interpretabilidad es la máxima prioridad.",
+        "El tiempo de entrenamiento es extremadamente limitado.",
+        "La memoria es muy limitada.",
+        "Se necesitan probabilidades muy bien calibradas."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.3,
+        "precision_predictiva": 0.82,
+        "costo_computacional": 0.5,
+        "robustez_outliers": 0.7
       },
-      {
-        "model_id": "GradientBoostingClassifier",
-        "task": "classification",
-        "family": "Ensamble (Boosting)",
-        "description": "Gradient Boosting para clasificación de sklearn. Construye árboles secuencialmente para optimizar la función de pérdida (log-loss típicamente).",
-        "strengths": [
-          "Potencial de precisión excepcional en datos tabulares.",
-          "Captura interacciones y patrones complejos muy bien.",
-          "Proporciona 'feature importance' útil.",
-          "Maneja bien diferentes tipos de features.",
-          "Proporciona probabilidades razonablemente calibradas."
-        ],
-        "limitations": [
-          "Muy sensible a hiperparámetros (learning_rate, n_estimators, max_depth).",
-          "Propenso a sobreajuste sin regularización adecuada.",
-          "Entrenamiento secuencial (no paralelizable entre árboles).",
-          "Más lento que Random Forest para entrenar.",
-          "Requiere mucho tiempo de tuning para buenos resultados.",
-          "Implementación de sklearn más lenta que alternativas modernas (XGBoost/LightGBM)."
-        ],
-        "recommendations_use_when": [
-          "La máxima precisión es la prioridad.",
-          "Se prefiere usar solo sklearn por consistencia.",
-          "El dataset no es extremadamente grande.",
-          "Se puede dedicar tiempo a tuning extensivo de hiperparámetros."
-        ],
-        "recommendations_avoid_when": [
-          "El tiempo de entrenamiento es crítico (considerar implementaciones más rápidas).",
-          "El dataset es muy grande (> 100k filas).",
-          "No se tiene tiempo para tuning detallado.",
-          "La interpretabilidad es crítica."
-        ],
-        "tradeoff_scores": {
-          "interpretabilidad": 0.25,
-          "precision_predictiva": 0.88,
-          "costo_computacional": 0.35,
-          "robustez_outliers": 0.5
-        },
-        "tags": ["ensamble", "boosting", "alta-precision", "tuning-sensible", "secuencial"]
-      }
-    ],
-    "experiencias": [],
-    "lecciones_analista": []
-  }
+      "tags": [
+        "ensamble",
+        "bagging",
+        "no-lineal",
+        "robusto",
+        "probabilidades",
+        "feature-importance"
+      ]
+    },
+    {
+      "model_id": "GradientBoostingClassifier",
+      "task": "classification",
+      "family": "Ensamble (Boosting)",
+      "description": "Gradient Boosting para clasificación de sklearn. Construye árboles secuencialmente para optimizar la función de pérdida (log-loss típicamente).",
+      "strengths": [
+        "Potencial de precisión excepcional en datos tabulares.",
+        "Captura interacciones y patrones complejos muy bien.",
+        "Proporciona 'feature importance' útil.",
+        "Maneja bien diferentes tipos de features.",
+        "Proporciona probabilidades razonablemente calibradas."
+      ],
+      "limitations": [
+        "Muy sensible a hiperparámetros (learning_rate, n_estimators, max_depth).",
+        "Propenso a sobreajuste sin regularización adecuada.",
+        "Entrenamiento secuencial (no paralelizable entre árboles).",
+        "Más lento que Random Forest para entrenar.",
+        "Requiere mucho tiempo de tuning para buenos resultados.",
+        "Implementación de sklearn más lenta que alternativas modernas (XGBoost/LightGBM)."
+      ],
+      "recommendations_use_when": [
+        "La máxima precisión es la prioridad.",
+        "Se prefiere usar solo sklearn por consistencia.",
+        "El dataset no es extremadamente grande.",
+        "Se puede dedicar tiempo a tuning extensivo de hiperparámetros."
+      ],
+      "recommendations_avoid_when": [
+        "El tiempo de entrenamiento es crítico (considerar implementaciones más rápidas).",
+        "El dataset es muy grande (> 100k filas).",
+        "No se tiene tiempo para tuning detallado.",
+        "La interpretabilidad es crítica."
+      ],
+      "tradeoff_scores": {
+        "interpretabilidad": 0.25,
+        "precision_predictiva": 0.88,
+        "costo_computacional": 0.35,
+        "robustez_outliers": 0.5
+      },
+      "tags": [
+        "ensamble",
+        "boosting",
+        "alta-precision",
+        "tuning-sensible",
+        "secuencial"
+      ]
+    }
+  ],
+  "experiencias": [],
+  "lecciones_analista": [],
+  "schema_version": "1.0",
+  "updated_at": "2025-10-23T00:00:00Z"
+}
