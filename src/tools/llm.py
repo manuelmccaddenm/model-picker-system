@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from openai import OpenAI
-from .config import OPENAI_MODEL
+from ..config import OPENAI_MODEL
 
 
 def _get_client() -> OpenAI:
@@ -95,3 +95,13 @@ def run_assistant_with_messages(
                     if parsed:
                         return parsed
     return {}
+
+
+def llm_chat(messages: List[Dict[str, str]], model: Optional[str] = None, temperature: float = 0.2) -> str:
+    client = OpenAI()
+    response = client.chat.completions.create(
+        model=model or OPENAI_MODEL,
+        temperature=temperature,
+        messages=messages,
+    )
+    return response.choices[0].message.content or ""
