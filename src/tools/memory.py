@@ -14,9 +14,30 @@ def _now_iso() -> str:
 def load_memory(memory_path: str | Path) -> Dict[str, Any]:
     p = Path(memory_path)
     if not p.exists():
-        return {"schema_version": "1.0", "updated_at": _now_iso(), "teoria": [], "experiencias": [], "lecciones_analista": []}
-    with p.open("r", encoding="utf-8") as f:
-        return json.load(f)
+        return {"schema_version": "1.0", "updated_at": _now_iso(), "theory": [], "experiences": [], "analyst_lessons": []}
+    try:
+        with p.open("r", encoding="utf-8") as f:
+            mem = json.load(f)
+    except Exception:
+        # Corrupted JSON: back up and reinitialize a safe default structure
+        try:
+            raw = p.read_text(encoding="utf-8")
+        except Exception:
+            raw = ""
+        backup = p.with_suffix(p.suffix + f".corrupted.{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}.bak")
+        try:
+            backup.write_text(raw, encoding="utf-8")
+        except Exception:
+            pass
+        mem = {"schema_version": "1.0", "updated_at": _now_iso(), "theory": [], "experiences": [], "analyst_lessons": []}
+    # Support both English and Spanish keys for backward compatibility
+    if "teoria" in mem and "theory" not in mem:
+        mem["theory"] = mem.pop("teoria")
+    if "experiencias" in mem and "experiences" not in mem:
+        mem["experiences"] = mem.pop("experiencias")
+    if "lecciones_analista" in mem and "analyst_lessons" not in mem:
+        mem["analyst_lessons"] = mem.pop("lecciones_analista")
+    return mem
 
 
 def save_memory(memory_path: str | Path, data: Dict[str, Any]) -> None:
@@ -38,9 +59,9 @@ def ensure_schema(memory_path: str | Path) -> Dict[str, Any]:
         mem["updated_at"] = _now_iso()
         changed = True
     for key, default in (
-        ("teoria", []),
-        ("experiencias", []),
-        ("lecciones_analista", []),
+        ("theory", []),
+        ("experiences", []),
+        ("analyst_lessons", []),
     ):
         if key not in mem or not isinstance(mem[key], list):
             mem[key] = default
@@ -53,7 +74,7 @@ def ensure_schema(memory_path: str | Path) -> Dict[str, Any]:
 def build_indexes(mem: Dict[str, Any]) -> Dict[str, Dict[str, List[str]]]:
     by_task: Dict[str, List[str]] = {}
     by_tag: Dict[str, List[str]] = {}
-    for m in mem.get("teoria", []):
+    for m in mem.get("theory", []):
         mid = m.get("model_id")
         task = m.get("task")
         if mid and task:
@@ -64,7 +85,7 @@ def build_indexes(mem: Dict[str, Any]) -> Dict[str, Dict[str, List[str]]]:
 
 
 def get_theory(mem: Dict[str, Any], task: Optional[str] = None, tags: Optional[List[str]] = None, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-    items = mem.get("teoria", [])
+    items = mem.get("theory", [])
     if task:
         items = [m for m in items if m.get("task") == task]
     if tags:
@@ -91,7 +112,7 @@ def rank_candidates_by_J(models: List[Dict[str, Any]], J_weights: Dict[str, floa
 
 
 def get_experiences(mem: Dict[str, Any], task: Optional[str] = None, k: int = 5) -> List[Dict[str, Any]]:
-    exps = mem.get("experiencias", [])
+    exps = mem.get("experiences", [])
     if task:
         exps = [e for e in exps if e.get("task") == task]
     return exps[:k]
@@ -102,7 +123,7 @@ def add_experience(memory_path: str | Path, experience: Dict[str, Any]) -> str:
     exp = dict(experience)
     exp.setdefault("id", f"exp_{uuid.uuid4().hex}")
     exp.setdefault("timestamp", _now_iso())
-    mem.setdefault("experiencias", []).append(exp)
+    mem.setdefault("experiences", []).append(exp)
     save_memory(memory_path, mem)
     return exp["id"]
 
@@ -112,6 +133,6 @@ def add_lesson(memory_path: str | Path, lesson: Dict[str, Any]) -> str:
     ls = dict(lesson)
     ls.setdefault("id", f"lesson_{uuid.uuid4().hex}")
     ls.setdefault("last_updated", _now_iso())
-    mem.setdefault("lecciones_analista", []).append(ls)
+    mem.setdefault("analyst_lessons", []).append(ls)
     save_memory(memory_path, mem)
     return ls["id"]
