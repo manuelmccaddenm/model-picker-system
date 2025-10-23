@@ -44,10 +44,11 @@ def main() -> None:
     print(f"Dataset: {dataset_path}")
     print(f"Initial prompt: {args.prompt}\n")
     
+    MAX_DATA_ITERATIONS = 4
     iteration = 0
-    while True:
+    while iteration < MAX_DATA_ITERATIONS:
         iteration += 1
-        print(f"\n--- Data Agent Iteration {iteration} ---")
+        print(f"\n--- Data Agent Iteration {iteration}/{MAX_DATA_ITERATIONS} ---")
         
         msg = (
             f"You are analyzing a dataset for a machine learning project.\n\n"
@@ -65,12 +66,7 @@ def main() -> None:
         bc_result = Runner.run_sync(data_agent, msg)
         bc = bc_result.final_output_as(BusinessContext)
         
-        # If missing, ask user to answer clarifying questions
-        if bc.task and bc.target:
-            print(f"\n✓ Task identified: {bc.task}")
-            print(f"✓ Target identified: {bc.target}")
-            break
-        
+        # Check if we have clarifying questions to ask
         if bc.clarifying_questions:
             print("\n🤔 Data Agent needs clarification:")
             for q in bc.clarifying_questions:
@@ -78,13 +74,29 @@ def main() -> None:
                 user_context.setdefault("ANSWERS", []).append({"question": q, "answer": ans})
             continue
         
-        # If agent didn't provide questions and still missing fields, show what we have
+        # No more questions - check if we have task and target
+        if bc.task and bc.target:
+            print(f"\n✓ Task identified: {bc.task}")
+            print(f"✓ Target identified: {bc.target}")
+            break
+        
+        # If agent didn't provide questions and still missing fields, fail
         print(f"\n⚠️  Data Agent returned incomplete context:")
         print(f"   task: {bc.task or 'MISSING'}")
         print(f"   target: {bc.target or 'MISSING'}")
         print(f"   clarifying_questions: {bc.clarifying_questions or 'NONE'}")
         raise RuntimeError("Data Agent could not determine task/target and provided no clarifying questions.")
+    
+    # Check if we hit max iterations without completing
+    if iteration >= MAX_DATA_ITERATIONS and (not bc.task or not bc.target):
+        print(f"\n⚠️  Reached maximum iterations ({MAX_DATA_ITERATIONS}) without complete context:")
+        print(f"   task: {bc.task or 'MISSING'}")
+        print(f"   target: {bc.target or 'MISSING'}")
+        raise RuntimeError(f"Data Agent could not complete after {MAX_DATA_ITERATIONS} iterations. Please provide more specific initial context.")
 
+    print("\n" + "="*60)
+    print("DATA AGENT COMPLETE")
+    print("="*60)
     print("BusinessContext:", json.dumps(bc.model_dump(), ensure_ascii=False, indent=2))
 
     # 2) Model Agent: propose baseline using memory tools

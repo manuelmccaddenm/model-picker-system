@@ -73,7 +73,7 @@ class Implementation(BaseModel):
     library: str
     estimator_class: str
     preprocessing_steps: List[str] = []
-    hyperparameters: Dict[str, Any] = {}
+    hyperparameters: str = "{}"  # JSON string, e.g., '{"C": 1.0, "max_iter": 1000}'
     notes: str = ""
 
 
@@ -98,8 +98,15 @@ class RapidLoopResult(BaseModel):
     final_recommendation: ModelSpec
 
 
+class Experience(BaseModel):
+    task: str
+    dataset: str
+    outcome: str
+    learnings: str
+
+
 class MemoryUpdate(BaseModel):
-    new_experiences: List[Dict[str, str]] = []
+    new_experiences: List[Experience] = []
     new_lessons: List[str] = []
     notes: str = ""
 
@@ -121,10 +128,17 @@ DATA_INSTRUCTIONS = (
     "- Determine the target type when present: 'numeric' if dtype is continuous numeric (float/int with high cardinality), 'categorical' if few categories.\n"
     "- Flag warnings (e.g., >30% nulls in a key column, high categorical cardinality, potential target leakage due to future timestamps, etc.).\n"
     "\n"
-    "INITIAL QUESTIONNAIRE (mandatory on first interaction):\n"
-    "- If 'task' is not explicitly stated: ASK 'What business problem are you trying to solve?' or 'What do you want to predict?'\n"
-    "- If 'target' column is not explicitly stated: ASK 'Which column is your target variable?' (list potential candidates if obvious)\n"
-    "- ALWAYS ask about preferences: 'What matters more to you: interpretability (understanding why) or predictive precision (accuracy)?'\n"
+    "CONVERSATIONAL QUESTIONNAIRE (iterative, thoughtful questioning):\n"
+    "- This is a CONVERSATION, not a batch questionnaire. You have a MAXIMUM of 4 rounds to gather information.\n"
+    "- Ask 2-4 questions per round to be efficient, then think about the answers.\n"
+    "- Start with the most important missing information: task (what to predict) and target (which column).\n"
+    "- After each round of answers, think about what you learned and ask intelligent follow-up questions.\n"
+    "- Examples of good follow-ups:\n"
+    "  * If user says 'I care about interpretability' → ask 'Should I prioritize simple linear models, or are tree-based models okay?'\n"
+    "  * If user mentions a business constraint → ask 'Are there any features I should exclude or focus on?'\n"
+    "  * If target is imbalanced → ask 'Do you care more about precision or recall for the positive class?'\n"
+    "- Only stop asking questions when you have: task, target, and enough context to design a good solution.\n"
+    "- Be efficient: you have limited rounds, so prioritize the most important questions.\n"
     "- You can infer objective ∈ {'_classify','_regress'} and primary_metric ∈ {'_accuracy','_rmse','_loss'} from the target type.\n"
     "- Inference rule: if target is binary/categorical => objective='_classify', primary_metric='_accuracy'. "
     "If target is continuous numeric => objective='_regress', primary_metric='_rmse'.\n"
@@ -138,13 +152,16 @@ DATA_INSTRUCTIONS = (
     "   - panel: {entity_id_col, time_col}\n"
     "   - task_suggestion: {inferred_target_type, suggested_objective, suggested_primary_metric, class_imbalance_flag}\n"
     "   - data_warnings: list of detected issues.\n"
-    "4) Build 'clarifying_questions' list:\n"
-    "   - If task is missing: add question about business problem.\n"
-    "   - If target is missing: add question about target column (suggest candidates from profile).\n"
-    "   - ALWAYS add: question about interpretability vs precision preference.\n"
-    "5) Set 'objective' and 'primary_metric' by inferring from target type (if target is known).\n"
-    "6) Populate 'key_insights' with 3–6 actionable bullets about the dataset.\n"
-    "7) Leave 'task' and 'target' as null if not provided by user (they will answer in clarifying_questions).\n"
+    "4) Review PREVIOUS ANSWERS (if any) and update task, target, business_rules based on what you learned.\n"
+    "5) Decide what to ask next:\n"
+    "   - If task is still missing: ask about the business problem.\n"
+    "   - If target is still missing: ask which column to predict.\n"
+    "   - If you have task and target but lack context: ask intelligent follow-ups (preferences, constraints, priorities).\n"
+    "   - If you have enough information to proceed: set task/target, leave clarifying_questions EMPTY.\n"
+    "6) Add 1-3 thoughtful questions to 'clarifying_questions' (or leave empty if done).\n"
+    "7) Set 'objective' and 'primary_metric' by inferring from target type (if target is known).\n"
+    "8) Populate 'key_insights' with 3–6 actionable bullets about the dataset.\n"
+    "9) Store learned preferences and constraints in 'business_rules'.\n"
     "\n"
     "OUTPUT: Return ONLY valid JSON following the BusinessContext schema "
     "with keys: task, target, business_rules, objective, primary_metric, clarifying_questions, "
@@ -175,7 +192,7 @@ MODEL_INSTRUCTIONS = (
     "    'library': 'scikit-learn' | 'prophet' | 'statsmodels',\n"
     "    'estimator_class': 'LogisticRegression' | 'RandomForestClassifier' | etc.,\n"
     "    'preprocessing_steps': ['StandardScaler', 'OneHotEncoder', ...],\n"
-    "    'hyperparameters': { 'C': 1.0, 'max_depth': 10, ... },\n"
+    "    'hyperparameters': '{\"C\": 1.0, \"max_depth\": 10}' (JSON string format),\n"
     "    'notes': 'Brief implementation notes'\n"
     "  }\n"
     "- Keep it simple and aligned with sklearn conventions.\n\n"
@@ -194,7 +211,7 @@ MODEL_INSTRUCTIONS = (
     "        \"library\": \"scikit-learn\",\n"
     "        \"estimator_class\": \"LogisticRegression\",\n"
     "        \"preprocessing_steps\": [\"StandardScaler\", \"OneHotEncoder\"],\n"
-    "        \"hyperparameters\": {\"C\": 1.0, \"max_iter\": 1000},\n"
+    "        \"hyperparameters\": \"{\\\"C\\\": 1.0, \\\"max_iter\\\": 1000}\",\n"
     "        \"notes\": \"Linear model with L2 regularization\"\n"
     "      }\n"
     "    },\n"
