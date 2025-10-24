@@ -86,6 +86,8 @@ class ModelSpec(BaseModel):
 class ModelProposals(BaseModel):
     J_definition: str
     model_specs: List[ModelSpec]
+    confidence: Optional[Literal["low", "medium", "high"]] = "medium"
+    confidence_reason: Optional[str] = None
 
 
 class Iteration(BaseModel):
@@ -171,15 +173,15 @@ DATA_INSTRUCTIONS = (
 
 MODEL_INSTRUCTIONS = (
     "Role: You are the Model Agent. You design the initial technical plan based on the BusinessContext and the Memory.\n"
-    "Primary Goal: Define a business-aligned loss J and propose exactly 3 strong, diverse baseline model candidates.\n\n"
+    "Primary Goal: Define a business-aligned loss J and propose exactly 2 strong, diverse baseline model candidates.\n\n"
     "Inputs you will receive in the user message:\n"
     "- BUSINESS_CONTEXT: includes task, target, rules, clarifying questions, key insights (schema/EDA).\n"
     "- MEMORY: includes teoria (model catalog with tradeoffs) and experiencias (past outcomes).\n\n"
     "Grounding & Constraints:\n"
     "- Prefer models that exist in MEMORY.teoria for the given task; use their tradeoff_scores and tags.\n"
-    "- Ensure candidates are diverse in family (e.g., linear vs ensemble vs probabilistic) when possible.\n"
+    "- Ensure candidates are diverse in family (e.g., linear vs ensemble) when possible.\n"
     "- Respect obvious prerequisites (e.g., scaling_required) and business rules from BUSINESS_CONTEXT.\n"
-    "- Do not propose more than 3 models. Do not invent non-existent model names.\n"
+    "- Do not propose more than 2 models. Do not invent non-existent model names.\n"
     "- Avoid redundancy (no duplicates).\n\n"
     "How to design J (Loss):\n"
     "- Translate business tradeoffs (interpretability, precision_predictiva, costo_computacional, robustez_outliers if applicable) into an explicit weighted formula.\n"
@@ -198,8 +200,14 @@ MODEL_INSTRUCTIONS = (
     "- Keep it simple and aligned with sklearn conventions.\n\n"
     "Candidate selection rubric (apply before output):\n"
     "1) Alignment with BUSINESS_CONTEXT task/constraints.\n"
-    "2) Coverage across tradeoffs in J (don’t pick three similar models).\n"
+    "2) Coverage across tradeoffs in J (don't pick two similar models - ensure diversity).\n"
     "3) Leverage MEMORY.experiencias patterns when relevant (e.g., which families worked under similar data conditions).\n\n"
+    "Confidence assessment:\n"
+    "- Use MEMORY holistically (not fixed thresholds) to derive confidence ∈ {'low','medium','high'}.\n"
+    "- Consider: (1) THEORY coverage for this task/families and tradeoff tags; (2) EXPERIENCES volume, recency, and outcomes on similar data (target type, feature mix, size, warnings); (3) ANALYST_LESSONS alignment with BUSINESS_CONTEXT constraints and J; (4) Clarity/ambiguity in dataset_inferences and business_rules.\n"
+    "- Heuristics: 'low' when memory is sparse/contradictory or the context is novel/ambiguous; 'high' when consistent experiences and theory strongly match this context; otherwise 'medium'.\n"
+    "- Always set confidence_reason with 2–4 short bullets summarizing your evidence.\n\n"
+
     "Output format (STRICT): return ONLY valid JSON with this schema:\n"
     "{\n"
     "  \"J_definition\": \"J = 0.5*interpretabilidad + 0.4*precision_predictiva + 0.1*costo_computacional\",\n"
@@ -215,8 +223,10 @@ MODEL_INSTRUCTIONS = (
     "        \"notes\": \"Linear model with L2 regularization\"\n"
     "      }\n"
     "    },\n"
-    "    ... (2 more models)\n"
-    "  ]\n"
+    "    ... (1 more model)\n"
+    "  ],\n"
+    "  \"confidence\": \"low|medium|high\",\n"
+    "  \"confidence_reason\": \"Brief justification based on MEMORY coverage and data complexity\"\n"
     "}\n\n"
     "Quality bar:\n"
     "- Each rationale must be 1-3 sentences, referencing J tradeoffs and key constraints (interpretability, scaling, missing data).\n"
@@ -226,31 +236,123 @@ MODEL_INSTRUCTIONS = (
 
 
 EVAL_INSTRUCTIONS = (
-    "Role: You are the Eval Agent. You manage two loops: (A) Rapid Loop to converge on a strong recommendation by minimizing J, and (B) Slow Loop to extract learnings and update memory.\n\n"
-    "Inputs you may receive in the user message:\n"
-    "- BUSINESS_CONTEXT: task, target, rules, key insights, objective/metric if available.\n"
-    "- PROPOSALS: the Model Agent's J_definition and 3 model_specs (with implementation hints).\n"
-    "- RUN_HISTORY_TAIL (optional): recent JSONL lines with prior iterations.\n\n"
-    "J (Loss) Considerations:\n"
-    "- Treat J as a weighted combination of: precision_predictiva (performance), interpretabilidad, and costo_computacional (complexity/cost).\n"
-    "- Prefer steps that reduce J efficiently (e.g., simple preprocessing or small hyperparameter adjustments before expensive family changes).\n\n"
-    "Rapid Loop (Optimization):\n"
-    "- Objective: Propose a small number of iterations to improve J. Each iteration must include:\n"
-    "  * evaluation: a concise analysis of current candidates vs J tradeoffs and context constraints.\n"
-    "  * mutations: up to 3 concrete next steps (e.g., 'LogisticRegression: C=0.5', 'add StandardScaler', 'try RandomForest with max_depth=8').\n"
-    "- Stop when improvements are marginal, constraints block further gains, or you reach a reasonable iteration count.\n\n"
-    "Slow Loop (Meta-Learning):\n"
-    "- After final recommendation, synthesize 2–5 learnings that generalize.\n"
-    "- Propose suggested_memory_updates as a JSON object to append to memory (e.g., new experiences or adjusted tradeoff notes).\n\n"
-    "Output formats (STRICT):\n"
-    "- For Rapid Loop, return ONLY JSON matching:\n"
-    "  { 'iterations': [ { 'evaluation': string, 'mutations': [string] } ], 'final_recommendation': { 'model_id': string, 'rationale': string } }\n"
-    "- For Slow Loop, return ONLY JSON matching:\n"
-    "  { 'learnings': [string], 'suggested_memory_updates': { ... } }\n\n"
-    "Quality bar:\n"
-    "- Tie every recommendation to J tradeoffs: performance vs interpretability vs cost.\n"
-    "- Provide practical, library-aligned mutations (consistent with scikit-learn/prophet/statsmodels).\n"
-    "- Avoid redundant iterations; prefer the smallest change that plausibly reduces J.\n"
+    "Role: You are the Eval Agent. You run two loops:\n"
+    "  (A) RAPID LOOP: Analyze evaluation results and propose optimizations\n"
+    "  (B) SLOW LOOP: Extract generalizable learnings for future projects\n\n"
+    
+    "=== RAPID LOOP (when you see EVALUATION RESULTS) ===\n\n"
+    
+    "You will receive REAL evaluation results from the evaluate_models_j tool.\n"
+    "The tool has already:\n"
+    "  - Trained baseline models with cross-validation\n"
+    "  - Run hyperparameter optimization (HPO) for each\n"
+    "  - Calculated J = w_perf*perf_loss + w_interp*interp_loss + w_cost*cost_loss\n"
+    "  - Returned: {leaderboard: [...], winner: {...}}\n\n"
+    
+    "YOUR TASK:\n"
+    "1. ITERATION 0 (Baseline Analysis):\n"
+    "   - Analyze the leaderboard from EVALUATION RESULTS\n"
+    "   - Record evaluation: 'Baseline evaluation: Model X has J=0.45, Model Y has J=0.52...' (use ACTUAL J values from results)\n"
+    "   - Propose mutations: 2-3 concrete next steps to reduce J further\n"
+    "   - Consider confidence (from Model Agent):\n"
+    "     * If confidence='low' → explore more aggressively (diverse families, 2–3 iterations if J improves).\n"
+    "     * If confidence='high' → converge quickly (0–1 iterations unless J improves >5%).\n"
+    "     Examples:\n"
+    "     * 'Try LogisticRegression with C=0.1 (increase regularization for better interpretability)'\n"
+    "     * 'Add feature selection to reduce cost_computacional'\n"
+    "     * 'Try RandomForest with max_depth=5 (simpler tree for interpretability)'\n\n"
+    
+    "2. ITERATION 1-3 (Optimization):\n"
+    "   - Based on previous results, decide if mutations would help\n"
+    "   - If yes: propose new mutations\n"
+    "   - If no: stop iterating\n"
+    "   - Each iteration should have:\n"
+    "     * evaluation: What did we learn? Is J improving?\n"
+    "     * mutations: What should we try next? (or empty if done)\n\n"
+    
+    "3. STOP CRITERIA:\n"
+    "   - J improvements are < 5% between iterations\n"
+    "   - You've done 3-4 iterations\n"
+    "   - Business constraints prevent further optimization\n"
+    "   - Winner is clear and stable\n\n"
+    
+    "4. FINAL RECOMMENDATION:\n"
+    "   - Pick the model with lowest J from the leaderboard\n"
+    "   - Provide rationale: Why this model? How does it balance the tradeoffs?\n"
+    "   - Include implementation details from the winner\n\n"
+    
+    "OUTPUT FORMAT (RapidLoopResult):\n"
+    "{\n"
+    "  'iterations': [\n"
+    "    {\n"
+    "      'evaluation': 'Baseline: LogisticRegression J=0.42 (best), RandomForest J=0.51, GaussianNB J=0.58',\n"
+    "      'mutations': ['Try LogisticRegression with C=0.5', 'Add SelectKBest for feature selection']\n"
+    "    },\n"
+    "    {\n"
+    "      'evaluation': 'After tuning: J improved to 0.39. Interpretability high, performance good.',\n"
+    "      'mutations': []  // No more mutations needed\n"
+    "    }\n"
+    "  ],\n"
+    "  'final_recommendation': {\n"
+    "    'model_id': 'LogisticRegression',\n"
+    "    'rationale': 'Achieves lowest J=0.39 by balancing interpretability (0.9) and performance (0.85) with low cost (0.95)',\n"
+    "    'implementation': {...}  // Copy from winner\n"
+    "  }\n"
+    "}\n\n"
+    
+    "=== SLOW LOOP (when you see RAPID_LOOP_RESULT) ===\n\n"
+    
+    "YOUR PROCESS:\n"
+    "1. REFLECT on the entire rapid loop:\n"
+    "   - What worked? What didn't?\n"
+    "   - Were there patterns? (e.g., 'Linear models failed on high-cardinality data')\n"
+    "   - Did business constraints affect the outcome?\n\n"
+    
+    "2. READ THE LOGS provided (DATA/MODEL/EVAL) to ground your analysis. Identify:\n"
+    "   - Consistent patterns across iterations, tool outputs, and rationales.\n"
+    "   - Any failure points, instability, or contradictory evidence.\n"
+    "   - Signals about data characteristics and model behavior.\n\n"
+
+    "3. EXTRACT 2-5 GENERALIZABLE LEARNINGS:\n"
+    "   - NOT specific to this run (bad: 'LogisticRegression worked on sample.csv')\n"
+    "   - Generalizable patterns (good: 'For binary classification with interpretability priority, linear models outperform ensembles')\n"
+    "   - Focus on: model family performance, tradeoff insights, data patterns\n\n"
+    
+    "4. PROPOSE MEMORY UPDATES (grounded in the logs where possible):\n"
+    "   - new_experiences: Add this run's outcome\n"
+    "     * task: 'binary_classification'\n"
+    "     * dataset: dataset name\n"
+    "     * outcome: 'LogisticRegression achieved J=0.39'\n"
+    "     * learnings: 'Linear model excelled due to interpretability requirement'\n"
+    "   - new_lessons: Generalizable insights for the analyst\n"
+    "   - notes: Any additional context\n\n"
+    
+    "OUTPUT FORMAT (SlowLoopResult):\n"
+    "{\n"
+    "  'learnings': [\n"
+    "    'For binary classification with high interpretability weight (>0.4), linear models consistently outperform tree-based models',\n"
+    "    'HPO on regularization (C parameter) yields 5-10% J improvement for logistic regression',\n"
+    "    'Feature selection reduces computational cost without sacrificing performance on low-dimensional data'\n"
+    "  ],\n"
+    "  'suggested_memory_updates': {\n"
+    "    'new_experiences': [\n"
+    "      {\n"
+    "        'task': 'binary_classification',\n"
+    "        'dataset': 'sample.csv',\n"
+    "        'outcome': 'LogisticRegression with C=0.5 achieved J=0.39',\n"
+    "        'learnings': 'Linear model optimal when interpretability weight > 0.4'\n"
+    "      }\n"
+    "    ],\n"
+    "    'new_lessons': ['Interpretability-performance tradeoff favors linear models in binary classification'],\n"
+    "    'notes': 'User explicitly prioritized interpretability over accuracy'\n"
+    "  }\n"
+    "}\n\n"
+    
+    "CRITICAL RULES:\n"
+    "- ALWAYS call evaluate_models_j() in Rapid Loop (don't just guess results)\n"
+    "- Base mutations on actual J values, not intuition\n"
+    "- Stop iterating when improvements are marginal\n"
+    "- Slow loop learnings must be generalizable, not run-specific\n"
 )
 
 
@@ -272,10 +374,21 @@ def build_model_agent() -> sdk.Agent:
     )
 
 
-def build_eval_agent() -> sdk.Agent:
+def build_eval_agent_rapid() -> sdk.Agent:
+    """Build Eval Agent for Rapid Loop (optimization)"""
     return sdk.Agent(
-        name="EvalAgent",
+        name="EvalAgent_RapidLoop",
         instructions=EVAL_INSTRUCTIONS,
-        tools=[evaluate_models_j],
-        # We'll pass which output is expected at each step by changing the prompt
+        tools=[],  # No tools - we call evaluate_models_j directly in app.py
+        output_type=RapidLoopResult,
+    )
+
+
+def build_eval_agent_slow() -> sdk.Agent:
+    """Build Eval Agent for Slow Loop (meta-learning)"""
+    return sdk.Agent(
+        name="EvalAgent_SlowLoop",
+        instructions=EVAL_INSTRUCTIONS,
+        tools=[],  # No tools needed for reflection
+        output_type=SlowLoopResult,
     )

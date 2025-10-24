@@ -225,7 +225,8 @@ def evaluate_with_j_hpo_assumptions(
                 model.fit(Xtr, ytr)
                 fit_times.append(time.time() - start)
                 if task == "classification":
-                    prob = model.predict_proba(Xva)[:, 1]
+                    prob = model.predict_proba(Xva)
+                    # For binary, extract positive class probabilities; for multi-class, keep all
                     s = primary_metric(task, yva, None, prob, name="roc_auc")  # higher better
                 else:
                     pred = model.predict(Xva)
