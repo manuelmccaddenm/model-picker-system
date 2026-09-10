@@ -18,11 +18,16 @@ def _cv_split(task: str, y: np.ndarray):
 
 
 def _lookup_tradeoffs(model_id: str, memory: Dict[str, Any]) -> Tuple[float, float]:
-    # Returns (interpretabilidad, costo_computacional) in [0,1]
-    for m in memory.get("teoria", []):
+    # Returns (interpretability, computational_cost) in [0,1].
+    # English keys are canonical (memory.json and load_memory use them);
+    # Spanish keys are accepted for older memory files.
+    theory = memory.get("theory") or memory.get("teoria") or []
+    for m in theory:
         if m.get("model_id") == model_id:
             ts = m.get("tradeoff_scores", {}) or {}
-            return float(ts.get("interpretabilidad", 0.5)), float(ts.get("costo_computacional", 0.5))
+            interp = ts.get("interpretability", ts.get("interpretabilidad", 0.5))
+            cost = ts.get("computational_cost", ts.get("costo_computacional", 0.5))
+            return float(interp), float(cost)
     # Fallback heuristics
     lower = model_id.lower()
     if "logistic" in lower or "linear" in lower:
